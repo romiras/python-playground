@@ -98,7 +98,7 @@ def cpu_tasks_handler(cpu_queue: multiprocessing.Queue):
                 Exception('ugh')
 
             cpu_logger.info(f"/get message")
-            cpu_logger.info(f"qsize: {cpu_queue.qsize()}")
+            # cpu_logger.info(f"qsize: {cpu_queue.qsize()}")
 
             cpu_logger.info(f"==> calc: {message}")
 
@@ -119,7 +119,7 @@ async def io_tasks_handler(io_queue: asyncio.Queue, cpu_queue: multiprocessing.Q
         while True:
             io_logger.info(" get message")
             message = await io_queue.get()
-            io_logger.info(f"qsize: {io_queue.qsize()}")
+            # io_logger.info(f"qsize: {io_queue.qsize()}")
             io_logger.info(f"/get message: {message}")
 
             io_logger.info(f"==> process message: {message}")
@@ -129,7 +129,7 @@ async def io_tasks_handler(io_queue: asyncio.Queue, cpu_queue: multiprocessing.Q
 
             cpu_queue.put(result)
             io_logger.info("push result")
-            io_logger.info(f"CPU qsize: {cpu_queue.qsize()}")
+            # io_logger.info(f"CPU qsize: {cpu_queue.qsize()}")
 
             io_queue.task_done()
             io_logger.info("task done")
@@ -142,19 +142,19 @@ def enqueue_to_cpu(cpu_queue, message):
     mh_logger.info(' await enqueuing to CPU')
 
     cpu_queue.put(message)
-    qsize = cpu_queue.qsize()
+    # qsize = cpu_queue.qsize()
 
     mh_logger.info('/await enqueuing to CPU')
-    mh_logger.info(f"CPU qsize: {qsize}")
+    # mh_logger.info(f"CPU qsize: {qsize}")
 
 async def enqueue_to_io(io_queue, message):
     mh_logger.info(' await enqueuing to IO')
 
     await io_queue.put(message)
-    qsize = io_queue.qsize()
+    # qsize = io_queue.qsize()
 
     mh_logger.info('/await enqueuing to IO')
-    mh_logger.info(f"IO qsize: {qsize}")
+    # mh_logger.info(f"IO qsize: {qsize}")
 
 async def message_handler(message: object, cpu_queue: multiprocessing.Queue, io_queue: asyncio.Queue):
     mh_logger.info(f"  MH got {message}")
