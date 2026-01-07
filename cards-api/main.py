@@ -1,7 +1,43 @@
-from typing import Any
+from typing import Any, ClassVar
 import requests
 from functools import cmp_to_key
+from pydantic import BaseModel, Field, field_validator
 
+
+class Card(BaseModel):
+    code: str = Field(..., description="Card's code")
+    image: str = Field(..., description="Card's image")
+    value: str = Field(..., description="Card's value")
+    suit: str = Field(..., description="Card's suit")
+
+    VALUE_MAPPING: ClassVar[dict] = {
+        '10': '0',
+        'JACK': 'J',
+        'QUEEN': 'Q',
+        'KING': 'K',
+        'ACE': 'A'
+    }
+    
+    VALID_VALUES: ClassVar[list] = ['2', '3', '4', '5', '6', '7', '8', '9', '0', 'J', 'Q', 'K', 'A']
+
+    # Custom validator for additional checks
+    @field_validator('code')
+    @classmethod
+    def validate_code(cls, v):
+        if len(v) != 2:
+            raise ValueError("Invalid card code")
+        return v
+
+    @field_validator('value')
+    @classmethod
+    def validate_value(cls, v):
+        # Check if we need to map the value
+        if v in cls.VALUE_MAPPING:
+            v = cls.VALUE_MAPPING[v]
+            
+        if v not in cls.VALID_VALUES:
+            raise ValueError(f"Invalid card value: {v}")
+        return v
 
 class DeckManager:
     BASE_API_HOST = "https://www.deckofcardsapi.com"
@@ -45,13 +81,13 @@ class DeckManager:
         """
         print("Draw from a deck")
         data = self._api_get(f"/api/deck/{self.deck_id}/draw/?count={count}")
-        self.cards = data['cards']
+        self.cards = [Card.model_validate(card) for card in data['cards']]
 
-    def _card_code_to_rank(self, card_item: dict[str, Any]) -> int:
+    def _card_code_to_rank(self, card_item: Card) -> int:
         """
         extract a code and convert to rank
         """
-        code = card_item["code"]
+        code = card_item.code
         value = code[0]
         suit = code[1]
         return (len(self.CARDS_SUITS_ORDER) - self.CARDS_SUITS_ORDER.index(suit)) * 16 + \
@@ -67,7 +103,7 @@ class DeckManager:
         print("Cards:")
         # print cards in one line
         for card_item in self.cards:
-            print(f"{card_item['code']}", end=" ")
+            print(f"{card_item.code}", end=" ")
         print()
 
 def main():
