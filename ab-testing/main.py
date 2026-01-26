@@ -8,7 +8,8 @@ AB_TEST_WEIGHTS = {
 
 def main():
     ab_testing = AbTesting(AB_TEST_WEIGHTS)
-    print(f"A/B test group: {ab_testing.get_group()}")
+    for num in range(0, 20):
+        print(f"A/B test group: {ab_testing.get_group()}")
 
 
 if __name__ == "__main__":
