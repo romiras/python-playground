@@ -1,37 +1,28 @@
 import random
 
-class AbTestingRangeError(Exception):
-    pass
-
 
 class AbTesting:
     def __init__(self, ab_test_weights: dict[str, int]):
         self.ab_test_weights = ab_test_weights
 
-        self.ab_test_weights_pairs = self.ab_test_weights.items()
+        total_weight = sum(ab_test_weights.values())
+        if total_weight == 0:
+             raise ValueError("Total weight cannot be zero")
 
-        self.weights_sum = 0.0
-        for group, weight in self.ab_test_weights_pairs:
-            self.weights_sum += weight
+        self.thresholds = []
+        cumulative_prob = 0.0
 
-        self.prob_offsets_dict = {}
+        for group, weight in ab_test_weights.items():
+            probability = weight / total_weight
+            cumulative_prob += probability
+            self.thresholds.append((cumulative_prob, group))
 
     def get_group(self) -> str:
         rand = random.random()
-        # print(f"Random: {rand}")
 
-        prob_offset = 0.0
-        for group, weight in self.ab_test_weights_pairs:
-            if group in self.prob_offsets_dict:
-                offset = self.prob_offsets_dict[group]
-            else:
-                offset = weight / self.weights_sum
-                self.prob_offsets_dict[group] = offset
-
-            # print(f"Range: {prob_offset} - {prob_offset + offset} for group {group}")
-            if rand >= prob_offset and rand <= prob_offset + offset:
+        for threshold, group in self.thresholds:
+            if rand < threshold:
                 return group
 
-            prob_offset += offset
-
-        raise AbTestingRangeError("Random doesn't fall into any of groups!")
+        # Fallback for floating point rounding errors (e.g. rand=0.999999999999)
+        return self.thresholds[-1][1]
