@@ -1,0 +1,7 @@
+[project]
+name = "ab-testing"
+version = "0.1.0"
+description = "A/B testing demo"
+readme = "README.md"
+requires-python = ">=3.12.4"
+dependencies = []
