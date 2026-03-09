@@ -1,0 +1,7 @@
+[project]
+name = "metered_requests"
+version = "0.1.0"
+description = "A demo of metered requests demo"
+readme = "README.md"
+requires-python = ">=3.12.4"
+dependencies = []
